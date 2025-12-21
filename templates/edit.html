@@ -2,12 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Edit Student</title>
+    <title>Edit Data - Manajemen Data Siswa</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container mt-5">
-        <h1>Edit Student</h1>
+        <header class="mb-4 d-flex justify-content-between">
+            <div>
+                <h1 class="mb-0">Edit Data</h1>
+                <p class="text-muted mb-0">Edit data nya jangan yang aneh-aneh ya!
+                </p>
+            </div>
+        </header>
         <form method="POST">
             <input type="text" name="name" value="{{ student.name }}" required>
             <input type="number" name="age" value="{{ student.age }}" required>

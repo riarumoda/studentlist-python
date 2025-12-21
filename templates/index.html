@@ -1,13 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Students</title>
+    <title>Halaman Utama - Manajemen Data Siswa</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
 <body>
     <div class="container mt-5">
-        <h1>Students</h1>
+        <header class="mb-4 d-flex justify-content-between">
+            <div>
+                <h1 class="mb-0">Manajemen Data Siswa</h1>
+                <p class="text-muted mb-0">Halo, <strong>{{ current_user.username }}</strong>! Kelola data dengan aman.
+                </p>
+            </div>
+
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-danger d-inline-flex align-items-center justify-content-center">
+                <i class="bi bi-box-arrow-right"></i> Log Out
+            </a>
+        </header>
         <form action="/add" method="POST">
             <input type="text" name="name" placeholder="Name" required>
             <input type="number" name="age" placeholder="Age" required>
@@ -39,4 +51,5 @@
         </table>
     </div>
 </body>
+
 </html>

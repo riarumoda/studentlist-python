@@ -14,7 +14,7 @@ Proyek ini adalah aplikasi web sederhana yang dibuat dengan Flask dan SQLAlchemy
 - **Bootstrap**: Digunakan untuk styling dasar.
 
 ## Persyaratan
-- Python 3.6 atau lebih baru
+- Python 3.12 atau lebih baru
 - Virtual environment untuk isolasi paket
 
 ## Instalasi
@@ -41,6 +41,9 @@ Ikuti langkah-langkah di bawah ini untuk menginstal dan menjalankan proyek ini s
    ```bash
    pip install -r requirements.txt
    ```
+
+5. **Persiapkan environment**:
+   Silahkan baca file env.example untuk melanjutkan.
 
 5. **Jalankan aplikasi**:
    ```bash
