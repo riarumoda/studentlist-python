@@ -1,5 +1,5 @@
 # Impor deps yang diperlukan
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, make_response, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -15,11 +15,15 @@ app = Flask(__name__)
 # Apply environment variables
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+app.config['SESSION_PERMANENT'] = False
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 # Inisialisasi database dan login manager
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.session_protection = "strong"
 login_manager.login_view = 'login'
 
 # Model student
@@ -52,7 +56,10 @@ def load_user(user_id):
 def index():
     # Menggunakan query builder daripada pull secara raw
     students = Student.query.all()
-    return render_template('index.html', students=students)
+    response = make_response(render_template('index.html', students=students))
+    # Mencegah browser menampilkan halaman index dari cache setelah logout
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    return response
 
 # Route add student
 @app.route('/add', methods=['POST'])
@@ -104,8 +111,13 @@ def login():
 @app.route('/logout')
 @login_required
 def logout():
+    session.clear()
     logout_user()
-    return redirect(url_for('login'))
+    response = make_response(redirect(url_for('login')))
+    response.delete_cookie('session', path='/', domain=None)
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    flash('Anda telah berhasil keluar.')
+    return response
 
 # Route signup
 @app.route('/signup', methods=['GET', 'POST'])
