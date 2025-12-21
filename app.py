@@ -47,6 +47,7 @@ class User(UserMixin, db.Model):
 # Model untuk login
 @login_manager.user_loader
 def load_user(user_id):
+    # Gunakan ORM untuk mengambil user
     return db.session.get(User, int(user_id))
 
 ############################
@@ -95,47 +96,60 @@ def add_student():
         
     return redirect(url_for('index'))
 
-# Route delete student
+# Route delete student, ubah jadi POST untuk keamanan
 @app.route('/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_student(id):
+    # Hapus menggunakan ORM
     student = db.session.get(Student, id)
+    # Cek apakah student ada
     if student:
+        # Hapus data
         db.session.delete(student)
         db.session.commit()
+        flash(f"Siswa {student.name} berhasil dihapus!")
+    # Redirect ke halaman utama
     return redirect(url_for('index'))
 
 # Route edit student
 @app.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_student(id):
+    # Ambil data student menggunakan ORM
     student = db.session.get(Student, id)
+    # Cek apakah student ada
     if not student:
         abort(404)
-
+    # Proses form edit
     if request.method == 'POST':
+        # Update data dengan sanitasi dasar
         student.name = request.form.get('name', '').strip()
         student.grade = request.form.get('grade', '').strip()
+        # Validasi tipe data usia
         try:
             student.age = int(request.form.get('age'))
         except (ValueError, TypeError):
             flash("Usia harus berupa angka!")
             return render_template('edit.html', student=student)
-
+        # Simpan perubahan
         db.session.commit()
         flash("Data berhasil diperbarui!")
         return redirect(url_for('index'))
-    
+    # Tampilkan form edit
     return render_template('edit.html', student=student)
 
 # Route login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # Proses form login
     if request.method == 'POST':
+        # Ambil user dari database
         user = User.query.filter_by(username=request.form['username']).first()
+        # Cek password yang di-hash
         if user and check_password_hash(user.password, request.form['password']):
             login_user(user)
             return redirect(url_for('index'))
+        # Jika gagal
         flash('Username atau password salah.')
     return render_template('login.html')
 
@@ -143,8 +157,10 @@ def login():
 @app.route('/logout')
 @login_required
 def logout():
+    # Bersihkan session dan logout user
     session.clear()
     logout_user()
+    # Hapus cookie session secara eksplisit
     response = make_response(redirect(url_for('login')))
     response.delete_cookie('session', path='/', domain=None)
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
@@ -154,9 +170,13 @@ def logout():
 # Route signup
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    # Proses form signup
     if request.method == 'POST':
+        # Hash password sebelum disimpan
         hashed_pw = generate_password_hash(request.form['password'], method='pbkdf2:sha256')
+        # Simpan user baru
         new_user = User(username=request.form['username'], password=hashed_pw)
+        # Coba simpan ke database
         try:
             db.session.add(new_user)
             db.session.commit()
