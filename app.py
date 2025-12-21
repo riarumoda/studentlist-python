@@ -1,5 +1,5 @@
 # Impor deps yang diperlukan
-from flask import Flask, render_template, request, redirect, url_for, flash, make_response, session
+from flask import Flask, render_template, request, redirect, url_for, flash, make_response, session, abort
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -12,13 +12,15 @@ load_dotenv()
 
 # Variabel Global
 app = Flask(__name__)
+
 # Apply environment variables
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SESSION_PERMANENT'] = False
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_HTTPONLY'] = False
+app.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
+
 # Inisialisasi database dan login manager
 db = SQLAlchemy(app)
 login_manager = LoginManager()
@@ -65,35 +67,65 @@ def index():
 @app.route('/add', methods=['POST'])
 @login_required
 def add_student():
-    new_student = Student(
-        name=request.form['name'],
-        age=int(request.form['age']),
-        grade=request.form['grade']
-    )
-    db.session.add(new_student)
-    db.session.commit()
+    # Ambil data dari form dengan sanitasi dasar
+    name = request.form.get('name', '').strip()
+    grade = request.form.get('grade', '').strip()
+    
+    # Validasi tipe data usia
+    try:
+        age_input = request.form.get('age')
+        if not age_input:
+            flash("Usia tidak boleh kosong!")
+            return redirect(url_for('index'))
+            
+        age = int(age_input)
+    except (ValueError, TypeError):
+        flash("Input usia harus berupa angka!")
+        return redirect(url_for('index'))
+
+    # Simpan menggunakan ORM
+    try:
+        new_student = Student(name=name, age=age, grade=grade)
+        db.session.add(new_student)
+        db.session.commit()
+        flash(f"Siswa {name} berhasil ditambahkan!")
+    except Exception as e:
+        db.session.rollback()
+        flash("Gagal menambahkan data ke database.")
+        
     return redirect(url_for('index'))
 
 # Route delete student
-@app.route('/delete/<int:id>')
+@app.route('/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_student(id):
-    student = Student.query.get_or_404(id)
-    db.session.delete(student)
-    db.session.commit()
+    student = db.session.get(Student, id)
+    if student:
+        db.session.delete(student)
+        db.session.commit()
     return redirect(url_for('index'))
 
 # Route edit student
 @app.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_student(id):
-    student = Student.query.get_or_404(id)
+    student = db.session.get(Student, id)
+    if not student:
+        abort(404)
+
     if request.method == 'POST':
-        student.name = request.form['name']
-        student.age = request.form['age']
-        student.grade = request.form['grade']
+        student.name = request.form.get('name', '').strip()
+        student.grade = request.form.get('grade', '').strip()
+        try:
+            student.age = int(request.form.get('age'))
+        except (ValueError, TypeError):
+            flash("Usia harus berupa angka!")
+            return render_template('edit.html', student=student)
+
         db.session.commit()
+        flash("Data berhasil diperbarui!")
         return redirect(url_for('index'))
+    
     return render_template('edit.html', student=student)
 
 # Route login
