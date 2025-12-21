@@ -1,4 +1,4 @@
-Proyek ini adalah aplikasi web sederhana yang dibuat dengan Flask dan SQLite.
+Proyek ini adalah aplikasi web sederhana yang dibuat dengan Flask dan SQLAlchemy.
 
 ## Fitur
 - CRUD sederhana untuk entitas `Student`.
@@ -8,6 +8,9 @@ Proyek ini adalah aplikasi web sederhana yang dibuat dengan Flask dan SQLite.
 ## Teknologi
 - **Flask**: Framework web yang digunakan untuk mengembangkan aplikasi ini.
 - **Flask SQLAlchemy**: Digunakan untuk ORM dan manajemen database.
+- **Flask Login**: Digunakan untuk login dan signup page.
+- **DotEnv**: Digunakan untuk load environment variables.
+- **Werkzeug**: Digunakan untuk password hashing.
 - **Bootstrap**: Digunakan untuk styling dasar.
 
 ## Persyaratan
@@ -36,7 +39,7 @@ Ikuti langkah-langkah di bawah ini untuk menginstal dan menjalankan proyek ini s
 
 4. **Instal dependensi**:
    ```bash
-   pip install flask flask_sqlalchemy
+   pip install -r requirements.txt
    ```
 
 5. **Jalankan aplikasi**:
@@ -47,7 +50,7 @@ Ikuti langkah-langkah di bawah ini untuk menginstal dan menjalankan proyek ini s
 6. **Akses aplikasi**:
    Buka browser dan akses:
    ```
-   http://127.0.0.1:5000
+   http://localhost:5000
    ```
 
 ## Struktur Proyek
