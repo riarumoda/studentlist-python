@@ -42,7 +42,7 @@ Ikuti langkah-langkah di bawah ini untuk menginstal dan menjalankan proyek ini s
    pip install -r requirements.txt
    ```
 
-5. **Persiapkan environment**:
+5. **Persiapkan environment**:  
    Silahkan baca file env.example untuk melanjutkan.
 
 5. **Jalankan aplikasi**:
